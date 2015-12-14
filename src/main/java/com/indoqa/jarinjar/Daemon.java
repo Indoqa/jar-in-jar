@@ -21,10 +21,10 @@ import org.apache.commons.daemon.DaemonInitException;
 
 /**
  * Reference this class if you want to run a Java application that is wrapped by Jar-in-Jar as a Java service using JSVC.
- * 
- * @see http://stackoverflow.com/questions/7687159/how-to-convert-a-java-program-to-daemon-with-jsvc/7687991#7687991
- * @see http://commons.apache.org/proper/commons-daemon/
- * @see http://commons.apache.org/proper/commons-daemon/jsvc.html
+ *
+ * @see "http://stackoverflow.com/questions/7687159/how-to-convert-a-java-program-to-daemon-with-jsvc/7687991#7687991"
+ * @see "http://commons.apache.org/proper/commons-daemon/"
+ * @see "http://commons.apache.org/proper/commons-daemon/jsvc.html"
  */
 public class Daemon implements org.apache.commons.daemon.Daemon {
 
