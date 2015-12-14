@@ -30,7 +30,14 @@
   <version>1.0.0-SNAPSHOT</version>
 
   <name>Indoqa Jar-in-Jar</name>
+  <url>https://github.com/Indoqa/jar-in-jar</url>
   <description>Run Java applications from a single Jar.</description>
+  
+  <scm>
+    <connection>scm:git:git@github.com:Indoqa/jar-in-jar.git</connection>
+    <developerConnection>scm:git:git@github.com:Indoqa/jar-in-jar.git</developerConnection>
+    <url>https://github.com/Indoqa/jar-in-jar</url>
+  </scm>
   
   <dependencies>
     <dependency>
