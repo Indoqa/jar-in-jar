@@ -32,13 +32,13 @@ import java.util.jar.Manifest;
 /**
  * Use the {@link Main} if a Java library (jar) contains other JARs and you have to make sure that you use a file system based
  * classloader. It internally uses a {@link URLClassLoader} which works well with e.g. Spring's path matching resource filters.
- * 
+ *
  * The {@link Main} extracts all libraries to a temporary directory and deletes them at the end.
- * 
+ *
  * Note: Because of a bug in the {@link URLClassLoader} in Sun JVMs, the temporary directory can't be deleted at runtime on Windows
  * machines. Hence the cleanup shutdown hook only works on *nix systems. For that reason there is a cleanup method executed at the
  * beginning that removes all non-active directories on Windows machines.
- * 
+ *
  * see http://blogs.sun.com/CoreJavaTechTips/entry/closing_a_urlclassloader
  */
 public class Main {
@@ -98,6 +98,18 @@ public class Main {
 
         for (File eachTargetDirectory : getTargetParentDirectory().listFiles(targetDirectoryFileFilter)) {
             deleteTargetDirectory(eachTargetDirectory);
+        }
+    }
+
+    private static void closeQuietly(OutputStream outputStream) {
+        if (outputStream == null) {
+            return;
+        }
+
+        try {
+            outputStream.close();
+        } catch (IOException e) {
+            // ignore
         }
     }
 
@@ -200,7 +212,9 @@ public class Main {
             }
 
             File library = new File(targetDirectory, entry.getName());
-            copy(currentJar.getInputStream(entry), new FileOutputStream(library));
+            FileOutputStream outputStream = new FileOutputStream(library);
+            copy(currentJar.getInputStream(entry), outputStream);
+            closeQuietly(outputStream);
 
             if (SystemUtils.isJavaLibrary(entry)) {
                 jarUrls.add(library.toURI().toURL());
