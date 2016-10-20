@@ -49,7 +49,7 @@ public class Main {
     private static final String TRAY_ICON_PROVIDER_CLASS_PROPERTY = "tray-icon-provider-class";
 
     private static File targetDirectory;
-    private static ClassLoader classLoader;
+    private static URLClassLoader classLoader;
     private static JarFile currentJar;
 
     public static File getTargetDirectory() {
@@ -101,13 +101,13 @@ public class Main {
         }
     }
 
-    private static void closeQuietly(OutputStream outputStream) {
-        if (outputStream == null) {
+    private static void closeQuietly(Closeable closeable) {
+        if (closeable == null) {
             return;
         }
 
         try {
-            outputStream.close();
+            closeable.close();
         } catch (IOException e) {
             // ignore
         }
@@ -235,6 +235,7 @@ public class Main {
 
         @Override
         public void run() {
+            closeQuietly(classLoader);
             deleteTargetDirectory(this.targetDir);
         }
     }
