@@ -33,6 +33,10 @@
   <url>https://github.com/Indoqa/jar-in-jar</url>
   <description>Run Java applications from a single Jar.</description>
   
+  <properties>
+    <project.build.compiler.version>1.8</project.build.compiler.version>
+  </properties>
+
   <scm>
     <connection>scm:git:git@github.com:Indoqa/jar-in-jar.git</connection>
     <developerConnection>scm:git:git@github.com:Indoqa/jar-in-jar.git</developerConnection>

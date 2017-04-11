@@ -16,6 +16,10 @@
  */
 package com.indoqa.jarinjar;
 
+import static com.indoqa.jarinjar.SystemUtils.*;
+import static java.lang.Runtime.getRuntime;
+import static java.lang.Thread.currentThread;
+
 import java.awt.SystemTray;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -35,9 +39,9 @@ import java.util.jar.Manifest;
  *
  * The {@link Main} extracts all libraries to a temporary directory and deletes them at the end.
  *
- * Note: Because of a bug in the {@link URLClassLoader} in Sun JVMs, the temporary directory can't be deleted at runtime on Windows
- * machines. Hence the cleanup shutdown hook only works on *nix systems. For that reason there is a cleanup method executed at the
- * beginning that removes all non-active directories on Windows machines.
+ * Note: Because of a bug in the {@link URLClassLoader} in Sun JVMs (1.6), the temporary directory can't be deleted at runtime on
+ * Windows machines. Hence the cleanup shutdown hook only works on *nix systems. For that reason there is a cleanup method executed at
+ * the beginning that removes all non-active directories on Windows machines.
  *
  * see http://blogs.sun.com/CoreJavaTechTips/entry/closing_a_urlclassloader
  */
@@ -84,16 +88,12 @@ public class Main {
             return;
         }
 
-        FileFilter targetDirectoryFileFilter = new FileFilter() {
-
-            @Override
-            public boolean accept(File pathname) {
-                if (pathname.isDirectory() && pathname.getName().startsWith(TEMP_TARGET_DIR_PREFIX)) {
-                    return true;
-                }
-
-                return false;
+        FileFilter targetDirectoryFileFilter = pathname -> {
+            if (pathname.isDirectory() && pathname.getName().startsWith(TEMP_TARGET_DIR_PREFIX)) {
+                return true;
             }
+
+            return false;
         };
 
         for (File eachTargetDirectory : getTargetParentDirectory().listFiles(targetDirectoryFileFilter)) {
@@ -137,11 +137,11 @@ public class Main {
             return;
         }
 
-        Manifest manifest = SystemUtils.getCurrentManifest(com.indoqa.jarinjar.Main.class);
+        Manifest manifest = getCurrentManifest(Main.class);
         Class<?> trayIconProviderClass = null;
         String trayIconProviderClassName = null;
         try {
-            trayIconProviderClassName = SystemUtils.getManifestProperty(manifest, TRAY_ICON_PROVIDER_CLASS_PROPERTY);
+            trayIconProviderClassName = getManifestProperty(manifest, TRAY_ICON_PROVIDER_CLASS_PROPERTY);
             if (trayIconProviderClassName == null || "".equals(trayIconProviderClassName)) {
                 return;
             }
@@ -149,12 +149,15 @@ public class Main {
             trayIconProviderClass = classLoader.loadClass(trayIconProviderClassName);
 
             if (!TrayIconProvider.class.isAssignableFrom(trayIconProviderClass)) {
-                throw new IllegalArgumentException("The property '" + TRAY_ICON_PROVIDER_CLASS_PROPERTY
-                    + "' doesn't refer to a class that implements the interface " + TrayIconProvider.class.getName());
+                throw new IllegalArgumentException(
+                    "The property '" + TRAY_ICON_PROVIDER_CLASS_PROPERTY + "' doesn't refer to a class that implements the interface "
+                        + TrayIconProvider.class.getName());
             }
         } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("The property '" + TRAY_ICON_PROVIDER_CLASS_PROPERTY + "' points to the class '"
-                + trayIconProviderClassName + "' which can't be loaded from the classpath.", e);
+            throw new IllegalArgumentException(
+                "The property '" + TRAY_ICON_PROVIDER_CLASS_PROPERTY + "' points to the class '" + trayIconProviderClassName
+                    + "' which can't be loaded from the classpath.",
+                e);
         }
 
         try {
@@ -194,11 +197,11 @@ public class Main {
     }
 
     private static void registerCleanupShutdownHook() {
-        Runtime.getRuntime().addShutdownHook(new CleanupTargetDirShutdownHook(targetDirectory));
+        getRuntime().addShutdownHook(new CleanupTargetDirShutdownHook(targetDirectory));
     }
 
     private static void setContextClassLoader() {
-        Thread.currentThread().setContextClassLoader(classLoader);
+        currentThread().setContextClassLoader(classLoader);
     }
 
     private static void setupClassLoader() throws IOException {
@@ -207,7 +210,7 @@ public class Main {
         for (Enumeration<JarEntry> entries = currentJar.entries(); entries.hasMoreElements();) {
             JarEntry entry = entries.nextElement();
 
-            if (!SystemUtils.isJavaLibrary(entry) && !SystemUtils.isWebArchive(entry) && !SystemUtils.isNativeLibrary(entry)) {
+            if (!isJavaLibrary(entry) && !isWebArchive(entry) && !isNativeLibrary(entry)) {
                 continue;
             }
 
@@ -216,7 +219,7 @@ public class Main {
             copy(currentJar.getInputStream(entry), outputStream);
             closeQuietly(outputStream);
 
-            if (SystemUtils.isJavaLibrary(entry)) {
+            if (isJavaLibrary(entry)) {
                 jarUrls.add(library.toURI().toURL());
             }
         }
