@@ -1,3 +1,3 @@
 # Indoqa Jar-in-Jar
 
-Indoqa Jar-in-Jar runs single JAR applications.
+Run Java applications packaged in a single JAR file.
